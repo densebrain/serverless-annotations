@@ -1,0 +1,11 @@
+rootProject.name = 'serverless-builder-examples'
+
+include 'simple'
+includeBuild("${rootDir.parentFile.absolutePath}/lib") {
+  dependencySubstitution {
+    substitute module('org.densebrain:serverless-annotations') with project(':serverless-annotations')
+    substitute module('org.densebrain:serverless-plugin') with project(':serverless-plugin')
+  }
+}
+//findProject(':examples:simple')?.name = 'example-simple'
+

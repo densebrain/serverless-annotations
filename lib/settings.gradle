@@ -1,0 +1,6 @@
+rootProject.name = 'serverless-builder'
+include 'annotations'
+include 'plugin'
+
+project(":annotations").name = 'serverless-annotations'
+project(":plugin").name = 'serverless-plugin'

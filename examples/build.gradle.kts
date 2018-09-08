@@ -5,23 +5,28 @@ import org.densebrain.serverless.*
 
 buildscript {
   dependencies {
-    classpath(files(Artifacts.pluginJar))
+    classpath("org.densebrain:serverless-plugin")
+    classpath("com.github.jengelman.gradle.plugins:shadow:2.0.4")
   }
 }
 
 plugins {
-  id("com.github.johnrengelman.shadow")
+  base
+  java
+  kotlin("jvm") version "1.2.61"
 }
+
+val annotationBuild = gradle.includedBuild("serverless-builder").task(":serverless-annotations:build")
+val pluginBuild = gradle.includedBuild("serverless-builder").task(":serverless-plugin:build")
 
 subprojects {
   apply<ShadowPlugin>()
-//  if (Artifacts.)
-  //apply<ServerlessBuilderPlugin>()
+  apply<ServerlessBuilderPlugin>()
   apply(plugin = "java")
   apply(plugin = "kotlin")
 
   dependencies {
-    "implementation"(project(":annotations"))
+    "implementation"("org.densebrain:serverless-annotations")
     "implementation"("com.amazonaws:aws-lambda-java-core:1.1.0")
     "implementation"("com.amazonaws:aws-lambda-java-events:2.0.1")
   }
@@ -31,8 +36,11 @@ subprojects {
     classifier = ""
   }
 
+  tasks.getByName("build").dependsOn(annotationBuild)
+  shadowJar.dependsOn(annotationBuild)
+
   val serverlessBuildTask = tasks.create<ServerlessBuilderTask>("serverlessBuild") {
-    dependsOn(shadowJar)
+    dependsOn(pluginBuild,shadowJar)
 
     archive = file("${buildDir.absolutePath}/libs/${shadowJar.archiveName}")
     outputFile = file("${projectDir.absolutePath}/serverless.yml")

@@ -8,7 +8,7 @@ plugins {
 
 dependencies {
   "implementation"(gradleApi())
-  "implementation"(project(":annotations"))
+  "implementation"(project(":serverless-annotations"))
   "implementation"("org.freemarker","freemarker","2.3.28")
   "implementation"("org.yaml","snakeyaml","1.21")
   "implementation"("org.reflections","reflections","0.9.11")
