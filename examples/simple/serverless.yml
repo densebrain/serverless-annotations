@@ -1,0 +1,9 @@
+service: simple
+package:
+  artifact: /projects/oss/serverless-annotations/examples/simple/build/libs/simple.jar
+provider:
+  name: aws
+  runtime: java8
+  versionFunctions: false
+functions: {}
+resources: {}

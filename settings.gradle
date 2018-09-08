@@ -2,3 +2,8 @@ rootProject.name = 'serverless-annotations'
 include 'annotations'
 include 'plugin'
 
+//includeBuild("${rootDir}/examples")
+include 'examples'
+include 'examples:simple'
+//findProject(':examples:simple')?.name = 'example-simple'
+

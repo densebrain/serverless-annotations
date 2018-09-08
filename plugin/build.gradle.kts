@@ -1,29 +1,23 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import com.github.jengelman.gradle.plugins.shadow.PluginShadowPlugin
+import com.github.jengelman.gradle.plugins.shadow.ShadowPlugin
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-  java
-  kotlin("jvm") version "1.2.61"
-}
-
-group = "org.densebrain"
-version = "1.0-SNAPSHOT"
-
-val reflectionsVersion by extra { "0.9.11" }
-
-repositories {
-  mavenCentral()
+  id("com.github.johnrengelman.shadow")
 }
 
 dependencies {
-  gradleApi()
-  implementation("org.reflections:reflections:${reflectionsVersion}")
-  implementation(kotlin("stdlib-jdk8"))
-  testImplementation("junit", "junit", "4.12")
+  "implementation"(gradleApi())
+  "implementation"(project(":annotations"))
+  "implementation"("org.freemarker","freemarker","2.3.28")
+  "implementation"("org.yaml","snakeyaml","1.21")
+  "implementation"("org.reflections","reflections","0.9.11")
 }
 
-configure<JavaPluginConvention> {
-  sourceCompatibility = JavaVersion.VERSION_1_8
+val shadowJar = tasks.getByName<ShadowJar>("shadowJar") {
+  archiveName = "${project.name}.jar"
+  classifier = ""
 }
-tasks.withType<KotlinCompile> {
-  kotlinOptions.jvmTarget = "1.8"
-}
+
+tasks.getByName("build").dependsOn(shadowJar)
+tasks.getByName("jar").dependsOn(shadowJar)
