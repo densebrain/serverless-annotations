@@ -1,0 +1,4 @@
+rootProject.name = 'serverless-annotations'
+include 'annotations'
+include 'plugin'
+
