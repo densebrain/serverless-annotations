@@ -18,7 +18,7 @@ data class TestResponseModel(val id:String)
   http = [
     HttpEvent(
       path = "/test/{hello}",
-      method = HttpMethod.GET,
+      method = HttpEventMethod.GET,
       input = TestRequestModel::class,
       output = TestResponseModel::class,
       request = Request(
