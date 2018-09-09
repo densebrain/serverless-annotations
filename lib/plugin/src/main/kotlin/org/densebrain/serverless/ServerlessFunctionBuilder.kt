@@ -18,6 +18,7 @@ import java.net.URLClassLoader
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.reflect.KClass
 
+@Suppress("UNCHECKED_CAST")
 class ServerlessFunctionBuilder(
   protected val project: Project,
   protected val schemaOutputDir: File = File("${project.buildDir.absolutePath}/schema")
@@ -33,7 +34,7 @@ class ServerlessFunctionBuilder(
   protected val schemaGenerator = JsonSchemaGenerator(mapper, useExternalReferencing = true)
 
   var generateDocumentation = false
-
+  var extraModelClassNames = arrayOf<String>()
 
   fun getDocumentationModels():Map<String,Any> {
     return mapOf(
@@ -87,6 +88,9 @@ class ServerlessFunctionBuilder(
       val schemaClazzType = Class.forName(JsonSchema::class.java.name,false,ucl) as Class<Annotation>
       val schemaClazzes = reflections.getTypesAnnotatedWith(schemaClazzType)
       schemaClazzes.forEach { clazz -> storeSchema(clazz.kotlin) }
+      extraModelClassNames
+        .mapNotNull { clazzName -> try { Class.forName(clazzName,false,ucl) } catch (t:Throwable) { null } }
+        .forEach { clazz ->  storeSchema(clazz.kotlin) }
     }
 
     // FUNCS
