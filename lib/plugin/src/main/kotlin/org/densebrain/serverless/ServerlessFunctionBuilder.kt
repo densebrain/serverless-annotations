@@ -251,7 +251,7 @@ class ServerlessFunctionBuilder(
         }
 
         if (outputSchemaPath.isNotBlank()) {
-          val modelName = schemaNameFromPath(inputSchemaPath)
+          val modelName = schemaNameFromPath(outputSchemaPath)
           documentation["methodResponses"] = arrayOf(
             mapOf(
               "statusCode" to "200",
