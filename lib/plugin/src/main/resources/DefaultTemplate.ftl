@@ -10,4 +10,4 @@ provider:
   versionFunctions: false
 
 functions: {}
-resources: {}
+
