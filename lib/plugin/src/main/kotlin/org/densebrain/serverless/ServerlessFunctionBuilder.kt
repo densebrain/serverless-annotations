@@ -79,12 +79,13 @@ class ServerlessFunctionBuilder(
       .setScanners(SubTypesScanner(false), TypeAnnotationsScanner())
       .filterInputsBy(FilterBuilder().includePackage(basePackage)))
 
-
-    val funcClazzes = reflections.getTypesAnnotatedWith(Function::class.java)
+    val funcClazzType = Class.forName(Function::class.java.name,false,ucl) as Class<Annotation>
+    val funcClazzes = reflections.getTypesAnnotatedWith(funcClazzType)
 
     // DO SCHEMAS FIRST
     if (generateDocumentation) {
-      val schemaClazzes = reflections.getTypesAnnotatedWith(JsonSchema::class.java)
+      val schemaClazzType = Class.forName(JsonSchema::class.java.name,false,ucl) as Class<Annotation>
+      val schemaClazzes = reflections.getTypesAnnotatedWith(schemaClazzType)
       schemaClazzes.forEach { clazz -> storeSchema(clazz.kotlin) }
     }
 

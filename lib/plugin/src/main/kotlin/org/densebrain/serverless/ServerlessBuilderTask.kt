@@ -29,7 +29,7 @@ open class ServerlessBuilderTask : DefaultTask() {
   @Option(option = "outputFile", description = "Where to write the resulting Yaml file")
   open var outputFile: File? = null
 
-  @Option(option = "serverlessTemplate", description = "Template for serverless generation")
+  @Option(option = "serverlessConfigFile", description = "Template for serverless generation")
   open var serverlessConfigFile: File? = null
 
 
