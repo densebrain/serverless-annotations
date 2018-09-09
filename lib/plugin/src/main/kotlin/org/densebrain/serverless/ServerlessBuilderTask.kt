@@ -19,6 +19,8 @@ open class ServerlessBuilderTask : DefaultTask() {
   @Option(option = "documentationOutputFile", description = "An optional output file to write the documentation to as opposed to embedding it")
   open var documentationOutputFile: File? = null
 
+  @Option(option = "extraModelClassNames", description = "Extra models to include")
+  open var extraModelClassNames: Array<String> = arrayOf()
 
   @Option(option = "archive", description = "Base package to scan")
   open var basePackage: String? = null
@@ -89,7 +91,7 @@ open class ServerlessBuilderTask : DefaultTask() {
 
     // CONFIGURE
     functionBuilder.generateDocumentation = generateDocumentation
-
+    functionBuilder.extraModelClassNames = extraModelClassNames
     // GET THE BASE CONFIG
     val baseConfig = when {
       serverlessConfigFile == null -> getServerlessConfig()

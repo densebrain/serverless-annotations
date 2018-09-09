@@ -1,9 +1,11 @@
 import com.github.zafarkhaja.semver.Version
 import com.jfrog.bintray.gradle.BintrayExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.gradle.api.tasks.bundling.Jar
 import java.util.Date
 import java.util.Properties
 import java.io.StringReader
+
 
 buildscript {
   dependencies {
@@ -66,7 +68,7 @@ subprojects {
     sourceCompatibility = JavaVersion.VERSION_1_8
 
     sourceSets {
-      "main" {
+      getByName("main") {
         java {
           srcDirs("src/main/kotlin")
         }
@@ -78,9 +80,13 @@ subprojects {
    * Sources JAR for distro
    */
   val sourcesJar = tasks.create<Jar>("sourceJar") {
-    from(java.sourceSets["main"].java.srcDirs)
-    classifier = "source"
+    classifier = "sources"
+    from(project.sourceSets["main"].java.srcDirs)
   }
+//  val sourcesJar by tasks.registering(Jar::class) {
+//    classifier = "sources"
+//    from(sourceSets["main"].allSource)
+//  }
 
   /**
    * Artifacts (SOURCES)
