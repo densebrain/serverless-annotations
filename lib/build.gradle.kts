@@ -81,7 +81,7 @@ subprojects {
    */
   val sourcesJar = tasks.create<Jar>("sourceJar") {
     classifier = "sources"
-    from(project.sourceSets["main"].java.srcDirs)
+    from(sourceSets["main"].java.srcDirs)
   }
 //  val sourcesJar by tasks.registering(Jar::class) {
 //    classifier = "sources"
