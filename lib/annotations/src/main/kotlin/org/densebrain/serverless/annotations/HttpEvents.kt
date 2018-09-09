@@ -31,7 +31,7 @@ annotation class CORSConfig(
   )
 )
 
-enum class HttpMethod {
+enum class HttpEventMethod {
   GET,
   POST,
   PUT,
@@ -48,7 +48,7 @@ annotation class Documentation(
 
 annotation class HttpEvent(
   val path: String,
-  val method: HttpMethod = HttpMethod.GET,
+  val method: HttpEventMethod = HttpEventMethod.GET,
   val input: KClass<*> = KClass::class,
   val output: KClass<*> = KClass::class,
   val cors: CORSConfig = CORSConfig(),
