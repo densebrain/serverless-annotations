@@ -9,6 +9,12 @@ data class TestResponseModel(val id:String)
 
 @Function(
   name = "TestLambda",
+  environment = [
+    Environment(
+      name = "REF_VAR",
+      yaml = """"Fn::GetAtt": [SessionUpdateLambdaFunction, Arn]"""
+    )
+  ],
   http = [
     HttpEvent(
       path = "/test/{hello}",
