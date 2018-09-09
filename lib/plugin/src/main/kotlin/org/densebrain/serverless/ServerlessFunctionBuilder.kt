@@ -11,6 +11,8 @@ import org.reflections.scanners.TypeAnnotationsScanner
 import org.reflections.util.ClasspathHelper
 import org.reflections.util.ConfigurationBuilder
 import org.reflections.util.FilterBuilder
+import org.yaml.snakeyaml.DumperOptions
+import org.yaml.snakeyaml.Yaml
 import java.io.File
 import java.net.URLClassLoader
 import java.util.concurrent.atomic.AtomicBoolean
@@ -95,6 +97,8 @@ class ServerlessFunctionBuilder(
       functionConfig[func.name] = with(func) {
         val config = FunctionConfig(clazz.qualifiedName!!)
         http.forEach { httpEvent -> config.addEvent(func,httpEvent) }
+        schedule.forEach { scheduleEvent -> config.addEvent(func,scheduleEvent) }
+        cloudwatch.forEach { cloudwatchEvent -> config.addEvent(func,cloudwatchEvent) }
         environment.forEach(config::addEnvironment)
         config
       }.toMap()
@@ -143,7 +147,7 @@ class ServerlessFunctionBuilder(
   @Suppress("unused")
   inner class FunctionConfig(
     val handler: String,
-    val environment: MutableMap<String, String> = mutableMapOf(),
+    val environment: MutableMap<String, Any> = mutableMapOf(),
     val timeout: Int = 30,
     val events: MutableList<Map<String, Any>> = mutableListOf()
   ) {
@@ -170,7 +174,32 @@ class ServerlessFunctionBuilder(
      * Add an environment variable to the config
      */
     fun addEnvironment(env: Environment) {
-      environment[env.name] = env.value
+      environment[env.name] = when {
+        env.yaml.isNotBlank() -> yaml.load(env.yaml)
+        else -> env.value
+      }
+    }
+
+
+    /**
+     * Add cloud watch event to events
+     */
+    fun addEvent(func:Function, event: CloudwatchEvent) {
+      events.add(mapOf(
+        "cloudwatchEvent" to yaml.load(event.event)
+      ))
+    }
+
+    /**
+     * Add schedule event to events
+     */
+    fun addEvent(func:Function, event: ScheduleEvent) {
+      events.add(mapOf(
+        "schedule" to event.schedule,
+        "enabled" to event.enabled,
+        "name" to if (event.name.isBlank()) func.name else event.name,
+        "description" to if (event.description.isBlank()) func.name else event.description
+      ))
     }
 
     /**
@@ -257,5 +286,10 @@ class ServerlessFunctionBuilder(
   companion object {
     internal val mapper = ObjectMapper()
     internal val mapTypeRef = object : TypeReference<Map<String, Any>>() {}
+    internal val yaml = Yaml(DumperOptions().apply {
+      indent = 2
+      defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
+      defaultScalarStyle = DumperOptions.ScalarStyle.PLAIN
+    })
   }
 }

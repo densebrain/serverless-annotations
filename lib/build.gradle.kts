@@ -5,14 +5,6 @@ import java.util.Date
 import java.util.Properties
 import java.io.StringReader
 
-val VERSION = file("${rootDir}/../version.txt").readText()
-val localProps = Properties().apply {
-  load(StringReader(file("${rootDir}/../local.properties").readText()))
-}
-val binTrayKey = localProps.getProperty("BINTRAY_API_KEY", "") as String
-
-logger.quiet("Bin tray key: ${binTrayKey}")
-
 buildscript {
   dependencies {
     classpath("com.github.jengelman.gradle.plugins:shadow:2.0.4")
@@ -28,8 +20,25 @@ plugins {
   kotlin("jvm") version "1.2.61"
 }
 
-group = "org.densebrain"
-version = VERSION
+// LOAD VERSION FILE AND PATCH INCREMENT
+var VERSION = file("${rootDir}/../version.txt").readText()
+VERSION = Version.valueOf(VERSION).incrementPatchVersion().toString()
+
+// LOAD LOCAL PROPS FOR DISTRIBUTION
+var binTrayKey = ""
+val localPropsFile = file("${rootDir}/../local.properties")
+if (localPropsFile.exists()) {
+  val localProps = Properties().apply {
+    load(StringReader(localPropsFile.readText()))
+  }
+
+  binTrayKey = localProps.getProperty("BINTRAY_API_KEY", "") as String
+}
+
+allprojects {
+  group = "org.densebrain"
+  version = VERSION
+}
 
 subprojects {
 
@@ -38,9 +47,6 @@ subprojects {
   apply(plugin = "maven-publish")
   apply(plugin = "com.jfrog.bintray")
 
-
-  group = "org.densebrain"
-  version = VERSION
 
   repositories {
     mavenCentral()
@@ -137,26 +143,22 @@ tasks {
 
     doLast {
       val versionFile = file("${rootDir}/../version.txt")
-      val oldVersion = versionFile.readText()
-      var version = Version.valueOf(oldVersion)
-      version = version.incrementPatchVersion()
-      val newVersion = version.toString()
-      println("New Version: ${newVersion}")
 
-      versionFile.writeText(newVersion)
+      versionFile.writeText(VERSION)
+
       project.exec {
         setCommandLine("git")
-        setArgs(mutableListOf("add", "version.txt"))
+        setArgs(mutableListOf("add", "../version.txt"))
       }
 
       project.exec {
         setCommandLine("git")
-        setArgs(mutableListOf("commit", "-m", newVersion))
+        setArgs(mutableListOf("commit","-a", "-m", VERSION))
       }
 
       project.exec {
         setCommandLine("git")
-        setArgs(mutableListOf("tag", newVersion))
+        setArgs(mutableListOf("tag", VERSION))
       }
 
       project.exec {

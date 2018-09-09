@@ -10,7 +10,11 @@ enum class FunctionEventType(val value: String, val clazz: KClass<*>) {
   Schedule("schedule", HttpEvent::class)
 }
 
-annotation class Environment(val name:String, val value:String)
+annotation class Environment(
+  val name:String,
+  val value:String = "",
+  val yaml: String = ""
+)
 
 annotation class Function(
   val name: String,
@@ -19,5 +23,6 @@ annotation class Function(
   val http: Array<HttpEvent> = arrayOf(),
   val awsProxy: Array<HttpEvent> = arrayOf(),
   val lambdaProxy: Array<HttpEvent> = arrayOf(),
-  val schedule: Array<ScheduleEvent> = arrayOf()
+  val schedule: Array<ScheduleEvent> = arrayOf(),
+  val cloudwatch: Array<CloudwatchEvent> = arrayOf()
 )

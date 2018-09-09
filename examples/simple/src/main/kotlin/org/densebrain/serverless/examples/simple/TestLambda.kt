@@ -24,6 +24,17 @@ data class TestResponseModel(val id:String)
 
   schedule = [
     ScheduleEvent("rate(3 minutes)")
+  ],
+
+  cloudwatch = [
+    CloudwatchEvent("""
+      event:
+        source:
+          - "aws.batch"
+        detail:
+          jobName:
+            - "$""" + """{self:custom.customVar}"
+    """)
   ]
 )
 class TestLambda : RequestHandler<TestRequestModel, TestResponseModel> {
