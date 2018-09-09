@@ -13,7 +13,14 @@ import java.io.StringWriter
 
 open class ServerlessBuilderTask : DefaultTask() {
 
-  @Option(option = "archive", description = "The archive to scan, should be a shadowed jar")
+  @Option(option = "documentation", description = "Whether or not to generate documentation")
+  open var generateDocumentation: Boolean = false
+
+  @Option(option = "documentationOutputFile", description = "An optional output file to write the documentation to as opposed to embedding it")
+  open var documentationOutputFile: File? = null
+
+
+  @Option(option = "archive", description = "Base package to scan")
   open var basePackage: String? = null
 
   @Option(option = "archive", description = "The archive to scan, should be a shadowed jar")
@@ -70,33 +77,68 @@ open class ServerlessBuilderTask : DefaultTask() {
    * Run the task
    */
   @TaskAction
+  @Suppress("UNCHECKED_CAST")
   open fun run() {
     require(archive != null && archive?.exists() == true) {"Archive path is required: ${archive?.absolutePath ?: "null"}"}
     require(outputFile != null) {"Output path is required: ${outputFile?.absolutePath ?: "null"}"}
     require(basePackage != null) {"base package is required: ${basePackage ?: "null"}"}
+
     val outputFile = outputFile!!
     val archive = archive!!
     val basePackage = basePackage!!
 
+    // CONFIGURE
+    functionBuilder.generateDocumentation = generateDocumentation
+
+    // GET THE BASE CONFIG
     val baseConfig = when {
       serverlessConfigFile == null -> getServerlessConfig()
       else -> Yaml().load<Map<String,Any>>(serverlessConfigFile!!.readText())
     }
 
-    val functionConfig = functionBuilder.getFunctionConfig(archive, basePackage)
+    // PREPARE TO MAKE UPDATES
+    val config = baseConfig.toMutableMap()
 
-    outputFile.delete()
-    logger.quiet("Writing ${outputFile.absolutePath}")
-    FileWriter(outputFile)
-      .use { writer ->
-        val yaml = Yaml(DumperOptions().apply {
-          indent = 2
-          defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
-          defaultScalarStyle = DumperOptions.ScalarStyle.PLAIN
-        })
+    // SCAN PACKAGES FOR FUNCTIONS
+    val functionConfigs = functionBuilder.getFunctionConfigs(archive, basePackage)
 
-        yaml.dump(baseConfig, writer)
+    // UPDATE FUNCTIONS CONFIG
+    val functions:MutableMap<Any,Any> = when {
+      config["functions"] is Map<*, *> -> (baseConfig["functions"] as Map<Any,Any>).toMutableMap()
+      else -> mutableMapOf()
+    }
+
+    // ADD DISCOVERED FUNCTIONS
+    functions.putAll(functionConfigs)
+    config["functions"] = functions
+
+    // OUTPUT YAML
+    val yaml = Yaml(DumperOptions().apply {
+      indent = 2
+      defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
+      defaultScalarStyle = DumperOptions.ScalarStyle.PLAIN
+    })
+
+    // OUTPUT DOCUMENTATION
+    if (generateDocumentation) {
+      val documentation = functionBuilder.getDocumentationModels()
+      if (documentationOutputFile == null) {
+        val custom = (config["custom"] ?: run {
+          config["custom"] = mutableMapOf<String, Any>()
+          config["custom"]
+        }) as MutableMap<String, Any>
+
+        custom["documentation"] = documentation
+      } else {
+        logger.quiet("Writing documentation ${documentationOutputFile!!.absolutePath}")
+        documentationOutputFile!!.delete()
+        documentationOutputFile!!.writeText(yaml.dump(documentation))
       }
+    }
+
+    logger.quiet("Writing ${outputFile.absolutePath}")
+    outputFile.delete()
+    outputFile.writeText(yaml.dump(config))
 
   }
 

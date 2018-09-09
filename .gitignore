@@ -1,3 +1,11 @@
+local.properties
+
+serverless.yml
+serverless.yaml
+
+documentation.yml
+documentation.yaml
+
 # Created by .ignore support plugin (hsz.mobi)
 ### JetBrains template
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm

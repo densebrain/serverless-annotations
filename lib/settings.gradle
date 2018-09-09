@@ -1,4 +1,5 @@
 rootProject.name = 'serverless-builder'
+
 include 'annotations'
 include 'plugin'
 

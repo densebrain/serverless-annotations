@@ -45,6 +45,8 @@ subprojects {
     archive = file("${buildDir.absolutePath}/libs/${shadowJar.archiveName}")
     outputFile = file("${projectDir.absolutePath}/serverless.yml")
     basePackage = "org.densebrain.serverless.examples"
+    generateDocumentation = true
+    documentationOutputFile = file("${projectDir.absolutePath}/documentation.yml")
   }
 
   tasks.getByName("build").finalizedBy(

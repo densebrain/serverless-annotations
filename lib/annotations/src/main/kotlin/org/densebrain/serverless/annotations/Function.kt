@@ -10,14 +10,11 @@ enum class FunctionEventType(val value: String, val clazz: KClass<*>) {
   Schedule("schedule", HttpEvent::class)
 }
 
-interface Event {
-  fun toConfig(): Map<String, Any> {
-    return mapOf()
-  }
-}
+annotation class Environment(val name:String, val value:String)
 
 annotation class Function(
   val name: String,
+  val environment:Array<Environment> = arrayOf(),
   val timeout: Int = 30,
   val http: Array<HttpEvent> = arrayOf(),
   val awsProxy: Array<HttpEvent> = arrayOf(),
