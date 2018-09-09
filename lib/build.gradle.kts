@@ -7,7 +7,7 @@ import java.io.StringReader
 
 buildscript {
   dependencies {
-    classpath("com.github.jengelman.gradle.plugins:shadow:2.0.4")
+    //classpath("com.github.jengelman.gradle.plugins:shadow:2.0.4")
     classpath("com.github.zafarkhaja:java-semver:0.9.0")
   }
 }

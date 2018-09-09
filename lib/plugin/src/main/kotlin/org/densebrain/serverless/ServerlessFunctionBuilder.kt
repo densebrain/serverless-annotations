@@ -174,10 +174,11 @@ class ServerlessFunctionBuilder(
      * Add an environment variable to the config
      */
     fun addEnvironment(env: Environment) {
-      environment[env.name] = when {
-        env.yaml.isNotBlank() -> yaml.load(env.yaml)
+      val value:Any = when {
+        env.yaml.isNotBlank() -> yaml.load(env.yaml) as Map<String,Any>
         else -> env.value
       }
+      environment[env.name] = value
     }
 
 
