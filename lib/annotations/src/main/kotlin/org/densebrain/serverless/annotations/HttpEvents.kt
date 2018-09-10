@@ -13,7 +13,10 @@ annotation class Parameter(
 annotation class Request(
   val paths:Array<Parameter> = arrayOf(),
   val querystrings:Array<Parameter> = arrayOf(),
-  val headers:Array<Parameter> = arrayOf()
+  val headers:Array<Parameter> = arrayOf(
+    Parameter("Content-Type",false),
+    Parameter("Authorization",false)
+  )
 )
 
 annotation class CORSConfig(
