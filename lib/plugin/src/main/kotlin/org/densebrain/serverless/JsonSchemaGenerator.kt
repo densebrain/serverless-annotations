@@ -502,7 +502,10 @@ class JsonSchemaGenerator @JvmOverloads constructor(
     }
 
     override fun expectIntegerFormat(type: JavaType?): JsonIntegerFormatVisitor {
-      node.put("type", "integer")
+      node.put("type", when (type?.isTypeOrSubTypeOf(Date::class.java) == true) {
+        true -> "string"
+        else -> "integer"
+      })
 
       // Look for @Min, @Max => minumum, maximum
       currentProperty?.let {
@@ -521,7 +524,8 @@ class JsonSchemaGenerator @JvmOverloads constructor(
           get() = node
 
         override fun format(format: JsonValueFormat?) {
-          setFormat(node, format.toString())
+          if (type?.isTypeOrSubTypeOf(Date::class.java) != true)
+            setFormat(node, format.toString())
         }
 
         override fun numberType(type: JsonParser.NumberType?) {
