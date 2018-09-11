@@ -4,12 +4,17 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.densebrain.serverless.JsonSchemaGenerator
-
+import java.util.*
 
 
 internal class JsonSchemaGeneratorTest {
 
-  class TestModel(val myVal:Long)
+  enum class Permission {
+    HELLO,
+    GOODBYE
+  }
+
+  class TestModel(val date: Date, val myVal:Long, val permissions:Array<Permission>)
 
   @Test
   fun generateJsonSchema() {
