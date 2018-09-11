@@ -28,7 +28,12 @@ data class JsonSchemaConfig
       disableWarnings = false,
       useMinLengthForNotNull = false,
       useTypeIdForDefinitionName = false,
-      customType2FormatMapping = mapOf()
+      customType2FormatMapping = mapOf(
+        "java.lang.Long" to "int64",
+        "Long" to "int64",
+        "long" to "int64",
+        "integer" to "in64"
+      )
     )
 
     @JvmStatic
@@ -61,6 +66,8 @@ data class JsonSchemaConfig
       useMinLengthForNotNull = true,
       useTypeIdForDefinitionName = false,
       customType2FormatMapping = mapOf(
+        "java.lang.Long" to "number",
+
         // Java7 dates
         "java.time.LocalDateTime" to "datetime-local",
         "java.time.OffsetDateTime" to "datetime",
