@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.densebrain.serverless.annotations.*
 import org.densebrain.serverless.annotations.Function
 import org.gradle.api.Project
+import org.gradle.api.tasks.options.Option
 import org.reflections.Reflections
 import org.reflections.scanners.SubTypesScanner
 import org.reflections.scanners.TypeAnnotationsScanner
@@ -30,12 +31,33 @@ class ServerlessFunctionBuilder(
   private val processed = AtomicBoolean(false)
   private val functionConfig = mutableMapOf<String, Map<String, Any>>()
   private val clazzSchemaMap = mutableMapOf<KClass<*>, String>()
-
-  protected val schemaGenerator = JsonSchemaGenerator(mapper, useExternalReferencing = true)
+  private val schemaGenerator = JsonSchemaGenerator(mapper, useExternalReferencing = true)
 
   var generateDocumentation = false
   var extraModelClassNames = arrayOf<String>()
+  var excludeRegex: Array<String> = arrayOf()
+  var excludeModelRegex: Array<String> = arrayOf()
+  var excludeFunctionRegex: Array<String> = arrayOf()
 
+  /**
+   * Filter schema classes
+   */
+  private fun filterSchemaClazzes(clazzes:Set<Class<*>>):List<Class<*>> {
+    val filters = (excludeModelRegex + excludeRegex).map { it.toRegex() }
+    return clazzes.filter { clazz -> filters.none { filter -> filter.matches(clazz.name) } }
+  }
+
+  /**
+   * Filter schema classes
+   */
+  private fun filterFunctionClazzes(clazzes:Set<Class<*>>):List<Class<*>> {
+    val filters = (excludeFunctionRegex + excludeRegex).map { it.toRegex() }
+    return clazzes.filter { clazz -> filters.none { filter -> filter.matches(clazz.name) } }
+  }
+
+  /**
+   * Generate documentation models map
+   */
   fun getDocumentationModels():Map<String,Any> {
     return mapOf(
       "api" to mapOf(
@@ -86,7 +108,7 @@ class ServerlessFunctionBuilder(
     // DO SCHEMAS FIRST
     if (generateDocumentation) {
       val schemaClazzType = Class.forName(JsonSchema::class.java.name,false,ucl) as Class<Annotation>
-      val schemaClazzes = reflections.getTypesAnnotatedWith(schemaClazzType)
+      val schemaClazzes = filterSchemaClazzes(reflections.getTypesAnnotatedWith(schemaClazzType))
       schemaClazzes.forEach { clazz -> storeSchema(clazz.kotlin) }
       extraModelClassNames
         .mapNotNull { clazzName -> try { Class.forName(clazzName,false,ucl) } catch (t:Throwable) { null } }
@@ -94,23 +116,23 @@ class ServerlessFunctionBuilder(
     }
 
     // FUNCS
-    funcClazzes.forEach { funcClazz ->
-      log.quiet("Processing: ${funcClazz.name}")
+    filterFunctionClazzes(funcClazzes)
+      .forEach { funcClazz ->
+        log.quiet("Processing: ${funcClazz.name}")
 
-      val clazz = funcClazz.kotlin
-      val func = clazz.annotations.find { anno -> anno is Function }!! as Function
-      functionConfig[func.name] = with(func) {
-        val config = FunctionConfig(clazz.qualifiedName!!)
-        http.forEach { httpEvent -> config.addEvent(func,httpEvent) }
-        schedule.forEach { scheduleEvent -> config.addEvent(func,scheduleEvent) }
-        cloudwatch.forEach { cloudwatchEvent -> config.addEvent(func,cloudwatchEvent) }
-        environment.forEach(config::addEnvironment)
-        config
-      }.toMap()
+        val clazz = funcClazz.kotlin
+        val func = clazz.annotations.find { anno -> anno is Function }!! as Function
+        functionConfig[func.name] = with(func) {
+            val config = FunctionConfig(clazz.qualifiedName!!)
+            http.forEach { httpEvent -> config.addEvent(func,httpEvent) }
+            schedule.forEach { scheduleEvent -> config.addEvent(func,scheduleEvent) }
+            cloudwatch.forEach { cloudwatchEvent -> config.addEvent(func,cloudwatchEvent) }
+            environment.forEach(config::addEnvironment)
+            config
+        }.toMap()
 
-
-      log.quiet("Processing function: ${clazz.simpleName} / ${func.name}")
-    }
+        log.quiet("Processing function: ${clazz.simpleName} / ${func.name}")
+      }
 
 
     return functionConfig

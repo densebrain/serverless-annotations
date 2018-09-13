@@ -22,6 +22,15 @@ open class ServerlessBuilderTask : DefaultTask() {
   @Option(option = "extraModelClassNames", description = "Extra models to include")
   open var extraModelClassNames: Array<String> = arrayOf()
 
+  @Option(option = "excludeRegex", description = "Extra models to include")
+  open var excludeRegex: Array<String> = arrayOf()
+
+  @Option(option = "excludeModelRegex", description = "Extra models to include")
+  open var excludeModelRegex: Array<String> = arrayOf()
+
+  @Option(option = "excludeFunctionRegex", description = "Extra models to include")
+  open var excludeFunctionRegex: Array<String> = arrayOf()
+
   @Option(option = "archive", description = "Base package to scan")
   open var basePackage: String? = null
 
@@ -92,6 +101,10 @@ open class ServerlessBuilderTask : DefaultTask() {
     // CONFIGURE
     functionBuilder.generateDocumentation = generateDocumentation
     functionBuilder.extraModelClassNames = extraModelClassNames
+    functionBuilder.excludeRegex = excludeRegex
+    functionBuilder.excludeModelRegex = excludeModelRegex
+    functionBuilder.excludeFunctionRegex = excludeFunctionRegex
+
     // GET THE BASE CONFIG
     val baseConfig = when {
       serverlessConfigFile == null -> getServerlessConfig()
