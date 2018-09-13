@@ -51,11 +51,6 @@ subprojects {
   apply(plugin = "com.jfrog.bintray")
   apply(plugin = "org.junit.platform.gradle.plugin")
 
-//junitPlatform {
-//    platformVersion = Versions.junitPlatform // optional, defaults to plugin version
-//      reportsDir = file("${rootDir}/build/test-results/junit-platform") // this is the default
-//  }
-
   repositories {
     mavenCentral()
   }
