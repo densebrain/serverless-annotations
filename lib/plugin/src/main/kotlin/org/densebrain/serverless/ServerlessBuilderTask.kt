@@ -31,7 +31,7 @@ open class ServerlessBuilderTask : DefaultTask() {
   @Option(option = "excludeFunctionRegex", description = "Extra models to include")
   open var excludeFunctionRegex: Array<String> = arrayOf()
 
-  @Option(option = "archive", description = "Base package to scan")
+  @Option(option = "basePackage", description = "Base package to scan")
   open var basePackage: String? = null
 
   @Option(option = "archive", description = "The archive to scan, should be a shadowed jar")
