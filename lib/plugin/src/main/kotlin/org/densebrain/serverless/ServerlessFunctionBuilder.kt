@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.densebrain.serverless.annotations.*
 import org.densebrain.serverless.annotations.Function
 import org.gradle.api.Project
-import org.gradle.api.tasks.options.Option
 import org.reflections.Reflections
 import org.reflections.scanners.SubTypesScanner
 import org.reflections.scanners.TypeAnnotationsScanner
@@ -19,8 +18,8 @@ import java.net.URLClassLoader
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.reflect.KClass
 
-@Suppress("UNCHECKED_CAST")
-class ServerlessFunctionBuilder(
+@Suppress("UNCHECKED_CAST", "UNUSED_PARAMETER", "MemberVisibilityCanBePrivate")
+open class ServerlessFunctionBuilder(
   protected val project: Project,
   protected val schemaOutputDir: File = File("${project.buildDir.absolutePath}/schema")
 ) {
@@ -66,7 +65,7 @@ class ServerlessFunctionBuilder(
           "description" to "API"
         )
       ),
-      "models" to clazzSchemaMap.map { (key,schemaPath) ->
+      "models" to clazzSchemaMap.map { (_,schemaPath) ->
         val name = schemaNameFromPath(schemaPath)
 
         return@map mapOf(
@@ -182,20 +181,19 @@ class ServerlessFunctionBuilder(
     /**
      * Convert an array of func params to a required map
      */
-    private fun paramsToMap(params: Array<Parameter>): Map<String, Boolean> {
-      return params.foldRight(mutableMapOf(), { param, map ->
+    private fun paramsToMap(params: Array<Parameter>): Map<String, Boolean> =
+      params.foldRight(mutableMapOf()) { param, map ->
         map[param.name] = param.required
         map
-      })
-    }
+      }
 
-    private fun paramsToList(params: Array<Parameter>): List<Map<String,Any>> {
-      return params.map {param -> mapOf(
+
+    private fun paramsToList(params: Array<Parameter>): List<Map<String,Any>> =
+      params.map {param -> mapOf(
         "name" to param.name,
         "description" to param.description,
         "required" to param.required
       )}
-    }
 
     /**
      * Add an environment variable to the config
@@ -251,7 +249,7 @@ class ServerlessFunctionBuilder(
             "paths" to paramsToMap(event.request.paths),
             "querystrings" to paramsToMap(event.request.querystrings),
             "headers" to paramsToMap(event.request.headers)
-          ).filter { (key, values) -> values.isNotEmpty() }
+          ).filter { (_, values) -> values.isNotEmpty() }
         )
       )
 

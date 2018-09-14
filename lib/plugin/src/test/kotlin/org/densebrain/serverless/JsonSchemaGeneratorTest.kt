@@ -1,9 +1,7 @@
 package org.densebrain.serverless
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
-import org.densebrain.serverless.JsonSchemaGenerator
 import java.util.*
 
 
