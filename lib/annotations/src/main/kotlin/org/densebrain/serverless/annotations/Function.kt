@@ -24,5 +24,6 @@ annotation class Function(
   val awsProxy: Array<HttpEvent> = arrayOf(),
   val lambdaProxy: Array<HttpEvent> = arrayOf(),
   val schedule: Array<ScheduleEvent> = arrayOf(),
-  val cloudwatch: Array<CloudwatchEvent> = arrayOf()
+  val cloudwatch: Array<CloudwatchEvent> = arrayOf(),
+  val custom: Array<CustomEvent> = arrayOf()
 )

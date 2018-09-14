@@ -126,6 +126,7 @@ open class ServerlessFunctionBuilder(
             http.forEach { httpEvent -> config.addEvent(func,httpEvent) }
             schedule.forEach { scheduleEvent -> config.addEvent(func,scheduleEvent) }
             cloudwatch.forEach { cloudwatchEvent -> config.addEvent(func,cloudwatchEvent) }
+            custom.forEach { customEvent -> config.addEvent(func,customEvent) }
             environment.forEach(config::addEnvironment)
             config
         }.toMap()
@@ -206,6 +207,13 @@ open class ServerlessFunctionBuilder(
       environment[env.name] = value
     }
 
+
+    /**
+     * Add custom events
+     */
+    fun addEvent(func:Function, event: CustomEvent) {
+      events.add(yaml.load(event.yaml) as Map<String,Any>)
+    }
 
     /**
      * Add cloud watch event to events
