@@ -502,8 +502,11 @@ class JsonSchemaGenerator @JvmOverloads constructor(
     }
 
     override fun expectIntegerFormat(type: JavaType?): JsonIntegerFormatVisitor {
-      node.put("type", when (type?.isTypeOrSubTypeOf(Date::class.java) == true) {
-        true -> "string"
+      node.put("type", when  {
+        type?.isTypeOrSubTypeOf(Date::class.java) == true -> "string"
+        type?.isTypeOrSubTypeOf(Long::class.java) == true -> "number"
+        type?.isTypeOrSubTypeOf(Float::class.java) == true -> "number"
+        type?.isTypeOrSubTypeOf(Double::class.java) == true -> "number"
         else -> "integer"
       })
 
