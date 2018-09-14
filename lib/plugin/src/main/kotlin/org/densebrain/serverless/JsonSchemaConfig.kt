@@ -29,10 +29,10 @@ data class JsonSchemaConfig
       useMinLengthForNotNull = false,
       useTypeIdForDefinitionName = false,
       customType2FormatMapping = mapOf(
-        "java.lang.Long" to "int64",
-        "Long" to "int64",
-        "long" to "int64",
-        "integer" to "in64"
+//        "java.lang.Long" to "int64",
+//        "Long" to "int64",
+//        "long" to "int64",
+//        "integer" to "in64"
       )
     )
 
