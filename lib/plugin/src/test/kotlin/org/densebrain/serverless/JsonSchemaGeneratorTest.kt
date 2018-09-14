@@ -12,7 +12,12 @@ internal class JsonSchemaGeneratorTest {
     GOODBYE
   }
 
-  class TestModel(val date: Date, val myVal:Long, val permissions:Array<Permission>)
+  class TestModel(
+    val date: Date,
+    val myInt:Int,
+    val myLong:Long,
+    val permissions:Array<Permission>
+  )
 
   @Test
   fun generateJsonSchema() {
