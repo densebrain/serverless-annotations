@@ -3,6 +3,7 @@ package org.densebrain.serverless
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.junit.jupiter.api.Test
 import java.util.*
+import javax.validation.constraints.NotNull
 
 
 internal class JsonSchemaGeneratorTest {
@@ -13,6 +14,7 @@ internal class JsonSchemaGeneratorTest {
   }
 
   class TestModel(
+    @NotNull
     val date: Date,
     val myInt:Int,
     val myLong:Long,

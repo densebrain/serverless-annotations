@@ -16,6 +16,8 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.util.*
 import javax.validation.constraints.*
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.primaryConstructor
 
 /**
  * Created by Roee Shlomo on 11/29/2016.
@@ -273,7 +275,20 @@ class JsonSchemaGenerator @JvmOverloads constructor(
         } else if (prop?.getAnnotation(NotNull::class.java) != null) {
           true
         } else {
-          false
+          try {
+            val clazz = prop!!
+              .member
+              .declaringClass
+              .kotlin
+            val annotationContainers = listOf(
+              clazz.primaryConstructor?.parameters?.find { it.name == prop.name }?.annotations ?: listOf(),
+              clazz.members.find { it.name == prop.name }?.annotations ?: listOf()
+            ).flatten()
+
+            annotationContainers.any { anno -> anno is NotNull }
+          } catch (ex:Exception) {
+            false
+          }
         }
 
         if (requiredProperty) {
