@@ -20,6 +20,8 @@ annotation class Function(
   val name: String,
   val environment:Array<Environment> = [],
   val timeout: Int = 30,
+  val reservedConcurrency: Int = 0,
+  val memorySize: Int = 1024,
   val http: Array<HttpEvent> = [],
   val awsProxy: Array<HttpEvent> = [],
   val lambdaProxy: Array<HttpEvent> = [],
