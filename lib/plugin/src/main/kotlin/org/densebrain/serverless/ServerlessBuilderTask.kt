@@ -10,6 +10,7 @@ import org.yaml.snakeyaml.Yaml
 import java.io.File
 import java.io.FileWriter
 import java.io.StringWriter
+import java.io.Writer
 
 open class ServerlessBuilderTask : DefaultTask() {
 
@@ -65,7 +66,7 @@ open class ServerlessBuilderTask : DefaultTask() {
    */
   private fun getServerlessTemplateContent():String {
     val writer = StringWriter()
-    getServerlessTemplate().process(getTemplateDataModel(),writer)
+    getServerlessTemplate().process(getTemplateDataModel(),writer as Writer)
     return writer.buffer.toString()
   }
 
