@@ -123,7 +123,7 @@ open class ServerlessFunctionBuilder(
         val func = clazz.annotations.find { anno -> anno is Function }!! as Function
         functionConfig[func.name] = with(func) {
           val config = when (reservedConcurrency) {
-            -1 -> FunctionConfig(handler = clazz.qualifiedName!!, timeout = timeout, memorySize = memorySize)
+            0 -> FunctionConfig(handler = clazz.qualifiedName!!, timeout = timeout, memorySize = memorySize)
             else -> FunctionConfig(handler = clazz.qualifiedName!!, timeout = timeout, reservedConcurrency = reservedConcurrency, memorySize = memorySize)
           }
 
