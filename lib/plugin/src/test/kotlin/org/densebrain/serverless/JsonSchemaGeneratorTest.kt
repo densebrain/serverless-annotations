@@ -18,7 +18,8 @@ internal class JsonSchemaGeneratorTest {
     val date: Date,
     val myInt:Int,
     val myLong:Long,
-    val permissions:Array<Permission>
+    val permissions:Array<Permission>,
+    val randomUnusedObject:Any
   )
 
   @Test
@@ -26,7 +27,13 @@ internal class JsonSchemaGeneratorTest {
     val objectMapper = ObjectMapper()
     val objectWriter = objectMapper.writerWithDefaultPrettyPrinter()
 
-    val generator = JsonSchemaGenerator(objectMapper, JsonSchemaConfig.vanillaJsonSchemaDraft4, false, setOf("JsonIgnore"))
+    val generator = JsonSchemaGenerator(
+      objectMapper,
+      JsonSchemaConfig.vanillaJsonSchemaDraft4,
+      false,
+      setOf("JsonIgnore"),
+      setOf(".*random.*")
+    )
     val node = generator.generateJsonSchema(TestModel::class.java)
     println("Result: \n${objectWriter.writeValueAsString(node)}")
   }

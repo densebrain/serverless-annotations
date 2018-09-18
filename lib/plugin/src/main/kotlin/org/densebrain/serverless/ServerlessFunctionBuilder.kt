@@ -30,13 +30,27 @@ open class ServerlessFunctionBuilder(
   private val processed = AtomicBoolean(false)
   private val functionConfig = mutableMapOf<String, Map<String, Any>>()
   private val clazzSchemaMap = mutableMapOf<KClass<*>, String>()
-  private val schemaGenerator = JsonSchemaGenerator(mapper, useExternalReferencing = true)
+
+  private var internalSchemaGenerator:JsonSchemaGenerator? = null
+  private val schemaGenerator:JsonSchemaGenerator
+    get() {
+      if (internalSchemaGenerator == null)
+        internalSchemaGenerator =  JsonSchemaGenerator(
+          mapper,
+          useExternalReferencing = true,
+          propertiesSkipRegex = excludePropertyRegex.toSet(),
+          propertiesAnnotationsToSkip = setOf("JsonIgnore")
+        )
+      return internalSchemaGenerator!!
+    }
 
   var generateDocumentation = false
   var extraModelClassNames = arrayOf<String>()
   var excludeRegex: Array<String> = arrayOf()
   var excludeModelRegex: Array<String> = arrayOf()
   var excludeFunctionRegex: Array<String> = arrayOf()
+  var excludePropertyRegex: Array<String> = arrayOf()
+
 
   /**
    * Filter schema classes

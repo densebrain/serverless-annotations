@@ -26,6 +26,9 @@ open class ServerlessBuilderTask : DefaultTask() {
   @Option(option = "excludeRegex", description = "Extra models to include")
   open var excludeRegex: Array<String> = arrayOf()
 
+  @Option(option = "excludePropertyRegex", description = "Extra models to include")
+  open var excludePropertyRegex: Array<String> = arrayOf()
+
   @Option(option = "excludeModelRegex", description = "Extra models to include")
   open var excludeModelRegex: Array<String> = arrayOf()
 
@@ -105,6 +108,7 @@ open class ServerlessBuilderTask : DefaultTask() {
     functionBuilder.excludeRegex = excludeRegex
     functionBuilder.excludeModelRegex = excludeModelRegex
     functionBuilder.excludeFunctionRegex = excludeFunctionRegex
+    functionBuilder.excludePropertyRegex = excludePropertyRegex
 
     // GET THE BASE CONFIG
     val baseConfig = when {

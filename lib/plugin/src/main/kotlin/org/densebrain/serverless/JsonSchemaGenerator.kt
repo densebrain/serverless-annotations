@@ -36,6 +36,7 @@ class JsonSchemaGenerator @JvmOverloads constructor(
   val config: JsonSchemaConfig = JsonSchemaConfig.vanillaJsonSchemaDraft4,
   val debug: Boolean = false,
   val propertiesAnnotationsToSkip: Set<String> = setOf(),
+  val propertiesSkipRegex: Set<String> = setOf(),
   val useExternalReferencing: Boolean = false
 ) {
   init {
@@ -184,6 +185,10 @@ class JsonSchemaGenerator @JvmOverloads constructor(
       fun myPropertyHandler(propertyName: String, propertyType: JavaType, prop: BeanProperty?, jsonPropertyRequired: Boolean): Unit {
         l("JsonObjectFormatVisitor - $propertyName: $propertyType")
 
+        if (propertiesSkipRegex.any { it.toRegex().matches(propertyName) }) {
+          return
+        }
+
         if (propertiesNode.get(propertyName) != null) {
           /*if (!config.disableWarnings) {
             log.warn(s"Ignoring property '$propertyName' in $propertyType since it has already been added, probably as type-property using polymorphism")
@@ -191,8 +196,7 @@ class JsonSchemaGenerator @JvmOverloads constructor(
           return
         }
 
-        val propertyAnnotations = prop?.member?.annotations()?.toList()?.map { it -> it.annotationClass.simpleName }
-
+        val propertyAnnotations = prop?.member?.allAnnotations?.annotations()?.map { it -> it.annotationClass.simpleName }
         if (propertyAnnotations != null && propertiesAnnotationsToSkip.intersect(propertyAnnotations).isNotEmpty()) {
           return
         }
