@@ -176,7 +176,7 @@ open class ServerlessFunctionBuilder(
     val handler: String,
     val environment: MutableMap<String, Any> = mutableMapOf(),
     val timeout: Int = 30,
-    val reservedConcurrency: Int = 100,
+    val reservedConcurrency: Int = 101,
     val memorySize: Int = 1024,
     val events: MutableList<Map<String, Any>> = mutableListOf()
   ) {
