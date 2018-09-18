@@ -122,13 +122,14 @@ open class ServerlessFunctionBuilder(
         val clazz = funcClazz.kotlin
         val func = clazz.annotations.find { anno -> anno is Function }!! as Function
         functionConfig[func.name] = with(func) {
-            val config = FunctionConfig(clazz.qualifiedName!!)
-            http.forEach { httpEvent -> config.addEvent(func,httpEvent) }
-            schedule.forEach { scheduleEvent -> config.addEvent(func,scheduleEvent) }
-            cloudwatch.forEach { cloudwatchEvent -> config.addEvent(func,cloudwatchEvent) }
-            custom.forEach { customEvent -> config.addEvent(func,customEvent) }
-            environment.forEach(config::addEnvironment)
-            config
+          val config = FunctionConfig(handler = clazz.qualifiedName!!, timeout = timeout, reservedConcurrency = reservedConcurrency, memorySize = memorySize)
+
+          http.forEach { httpEvent -> config.addEvent(func,httpEvent) }
+          schedule.forEach { scheduleEvent -> config.addEvent(func,scheduleEvent) }
+          cloudwatch.forEach { cloudwatchEvent -> config.addEvent(func,cloudwatchEvent) }
+          custom.forEach { customEvent -> config.addEvent(func,customEvent) }
+          environment.forEach(config::addEnvironment)
+          config
         }.toMap()
 
         log.quiet("Processing function: ${clazz.simpleName} / ${func.name}")
@@ -176,6 +177,8 @@ open class ServerlessFunctionBuilder(
     val handler: String,
     val environment: MutableMap<String, Any> = mutableMapOf(),
     val timeout: Int = 30,
+    val reservedConcurrency: Int = -1,
+    val memorySize: Int = 1024,
     val events: MutableList<Map<String, Any>> = mutableListOf()
   ) {
 
@@ -314,6 +317,9 @@ open class ServerlessFunctionBuilder(
     ).toMutableMap().apply {
       remove("input")
       remove("output")
+
+      // remove reservedConcurrency if was not explicitly set up
+      if (this["reservedConcurrency"] as Int == -1) remove("reservedConcurrency")
     }
   }
 
