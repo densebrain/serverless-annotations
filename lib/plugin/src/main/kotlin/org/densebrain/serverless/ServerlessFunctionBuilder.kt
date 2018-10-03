@@ -174,6 +174,7 @@ open class ServerlessFunctionBuilder(
       return clazzSchemaMap[clazz]!!
 
     schemaOutputDir.mkdirs()
+    log.quiet("Generating schema for ${clazz.qualifiedName}")
     val schema = schemaGenerator.generateJsonSchema(clazz.java)
     val schemaFile = File(schemaOutputDir, "${clazz.qualifiedName}.json")
     schemaFile.writeText(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(schema))
