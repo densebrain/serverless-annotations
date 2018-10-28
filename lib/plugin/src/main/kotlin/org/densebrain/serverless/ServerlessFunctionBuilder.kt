@@ -18,6 +18,15 @@ import java.net.URLClassLoader
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.reflect.KClass
 
+internal val DefaultCORSHeaders = arrayOf(
+"Content-Type",
+"Authorization",
+"X-Amz-Date",
+"X-Api-Key",
+"X-Amz-Security-Token",
+"X-Amz-User-Agent"
+)
+
 @Suppress("UNCHECKED_CAST", "UNUSED_PARAMETER", "MemberVisibilityCanBePrivate")
 open class ServerlessFunctionBuilder(
   protected val project: Project,
@@ -26,6 +35,8 @@ open class ServerlessFunctionBuilder(
 
   private val log
     get() = project.logger
+
+
 
   private val processed = AtomicBoolean(false)
   private val functionConfig = mutableMapOf<String, Map<String, Any>>()
@@ -97,7 +108,8 @@ open class ServerlessFunctionBuilder(
    */
   fun getFunctionConfigs(
     archive: File,
-    basePackage: String
+    basePackage: String,
+    corsHeaders: List<String>
   ): Map<String, Any> {
     if (processed.getAndSet(true))
       return functionConfig
@@ -136,7 +148,7 @@ open class ServerlessFunctionBuilder(
         val clazz = funcClazz.kotlin
         val func = clazz.annotations.find { anno -> anno is Function }!! as Function
         functionConfig[func.name] = with(func) {
-          val config = FunctionConfig(handler = clazz.qualifiedName!!, timeout = timeout, reservedConcurrency = reservedConcurrency, memorySize = memorySize)
+          val config = FunctionConfig(handler = clazz.qualifiedName!!, timeout = timeout, reservedConcurrency = reservedConcurrency, memorySize = memorySize, corsHeaders = corsHeaders)
 
           http.forEach { httpEvent -> config.addEvent(func,httpEvent) }
           schedule.forEach { scheduleEvent -> config.addEvent(func,scheduleEvent) }
@@ -194,7 +206,8 @@ open class ServerlessFunctionBuilder(
     val timeout: Int = 30,
     val reservedConcurrency: Int = -1,
     val memorySize: Int = 1024,
-    val events: MutableList<Map<String, Any>> = mutableListOf()
+    val events: MutableList<Map<String, Any>> = mutableListOf(),
+    val corsHeaders: List<String> = listOf()
   ) {
 
     /**
@@ -258,6 +271,9 @@ open class ServerlessFunctionBuilder(
      * Add http event to the config
      */
     fun addEvent(func:Function, event: HttpEvent) {
+      val isDefaultCORS = DefaultCORSHeaders.size == event.cors.headers.size &&
+        DefaultCORSHeaders.all { event.cors.headers.contains(it) }
+
       val httpEvent = mutableMapOf(
         "path" to event.path,
         "method" to event.method.name.toLowerCase(),
@@ -266,7 +282,11 @@ open class ServerlessFunctionBuilder(
           else -> mapOf(
             "origin" to event.cors.origin,
             "maxAge" to event.cors.maxAge,
-            "headers" to event.cors.headers,
+            "headers" to when {
+              !isDefaultCORS && event.cors.headers.isNotEmpty() -> event.cors.headers
+              corsHeaders.isNotEmpty() -> corsHeaders
+              else -> event.cors.headers
+            },
             "allowCredentials" to event.cors.allowCredentials
           )
         },
