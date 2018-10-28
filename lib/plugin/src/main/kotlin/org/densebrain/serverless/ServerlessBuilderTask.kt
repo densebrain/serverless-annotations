@@ -35,6 +35,9 @@ open class ServerlessBuilderTask : DefaultTask() {
   @Option(option = "excludeFunctionRegex", description = "Extra models to include")
   open var excludeFunctionRegex: Array<String> = arrayOf()
 
+  @Option(option = "defaultCorsConfig", description = "Extra models to include")
+  open var defaultCORSHeaders: List<String> = listOf()
+
   @Option(option = "basePackage", description = "Base package to scan")
   open var basePackage: String? = null
 
@@ -120,7 +123,7 @@ open class ServerlessBuilderTask : DefaultTask() {
     val config = baseConfig.toMutableMap()
 
     // SCAN PACKAGES FOR FUNCTIONS
-    val functionConfigs = functionBuilder.getFunctionConfigs(archive, basePackage)
+    val functionConfigs = functionBuilder.getFunctionConfigs(archive, basePackage, defaultCORSHeaders)
 
     // UPDATE FUNCTIONS CONFIG
     val functions:MutableMap<Any,Any> = when {
