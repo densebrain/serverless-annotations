@@ -18,11 +18,14 @@ annotation class Environment(
 
 annotation class Function(
   val name: String,
-  val environment:Array<Environment> = arrayOf(),
+  val environment:Array<Environment> = [],
   val timeout: Int = 30,
-  val http: Array<HttpEvent> = arrayOf(),
-  val awsProxy: Array<HttpEvent> = arrayOf(),
-  val lambdaProxy: Array<HttpEvent> = arrayOf(),
-  val schedule: Array<ScheduleEvent> = arrayOf(),
-  val cloudwatch: Array<CloudwatchEvent> = arrayOf()
+  val reservedConcurrency: Int = -1,
+  val memorySize: Int = 1024,
+  val http: Array<HttpEvent> = [],
+  val awsProxy: Array<HttpEvent> = [],
+  val lambdaProxy: Array<HttpEvent> = [],
+  val schedule: Array<ScheduleEvent> = [],
+  val cloudwatch: Array<CloudwatchEvent> = [],
+  val custom: Array<CustomEvent> = []
 )

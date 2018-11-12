@@ -16,6 +16,8 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import com.fasterxml.jackson.databind.node.ObjectNode
 import java.util.*
 import javax.validation.constraints.*
+import kotlin.reflect.KParameter
+import kotlin.reflect.full.primaryConstructor
 
 /**
  * Created by Roee Shlomo on 11/29/2016.
@@ -34,6 +36,7 @@ class JsonSchemaGenerator @JvmOverloads constructor(
   val config: JsonSchemaConfig = JsonSchemaConfig.vanillaJsonSchemaDraft4,
   val debug: Boolean = false,
   val propertiesAnnotationsToSkip: Set<String> = setOf(),
+  val propertiesSkipRegex: Set<String> = setOf(),
   val useExternalReferencing: Boolean = false
 ) {
   init {
@@ -182,6 +185,10 @@ class JsonSchemaGenerator @JvmOverloads constructor(
       fun myPropertyHandler(propertyName: String, propertyType: JavaType, prop: BeanProperty?, jsonPropertyRequired: Boolean): Unit {
         l("JsonObjectFormatVisitor - $propertyName: $propertyType")
 
+        if (propertiesSkipRegex.any { it.toRegex().matches(propertyName) }) {
+          return
+        }
+
         if (propertiesNode.get(propertyName) != null) {
           /*if (!config.disableWarnings) {
             log.warn(s"Ignoring property '$propertyName' in $propertyType since it has already been added, probably as type-property using polymorphism")
@@ -189,8 +196,7 @@ class JsonSchemaGenerator @JvmOverloads constructor(
           return
         }
 
-        val propertyAnnotations = prop?.member?.annotations()?.toList()?.map { it -> it.annotationClass.simpleName }
-
+        val propertyAnnotations = prop?.member?.allAnnotations?.annotations()?.map { it -> it.annotationClass.simpleName }
         if (propertyAnnotations != null && propertiesAnnotationsToSkip.intersect(propertyAnnotations).isNotEmpty()) {
           return
         }
@@ -273,7 +279,20 @@ class JsonSchemaGenerator @JvmOverloads constructor(
         } else if (prop?.getAnnotation(NotNull::class.java) != null) {
           true
         } else {
-          false
+          try {
+            val clazz = prop!!
+              .member
+              .declaringClass
+              .kotlin
+            val annotationContainers = listOf(
+              clazz.primaryConstructor?.parameters?.find { it.name == prop.name }?.annotations ?: listOf(),
+              clazz.members.find { it.name == prop.name }?.annotations ?: listOf()
+            ).flatten()
+
+            annotationContainers.any { anno -> anno is NotNull }
+          } catch (ex:Exception) {
+            false
+          }
         }
 
         if (requiredProperty) {
@@ -502,7 +521,13 @@ class JsonSchemaGenerator @JvmOverloads constructor(
     }
 
     override fun expectIntegerFormat(type: JavaType?): JsonIntegerFormatVisitor {
-      node.put("type", "integer")
+      node.put("type", when  {
+        type?.isTypeOrSubTypeOf(Date::class.java) == true -> "string"
+        type?.isTypeOrSubTypeOf(Long::class.java) == true -> "integer"
+        type?.isTypeOrSubTypeOf(Float::class.java) == true -> "number"
+        type?.isTypeOrSubTypeOf(Double::class.java) == true -> "number"
+        else -> "integer"
+      })
 
       // Look for @Min, @Max => minumum, maximum
       currentProperty?.let {
@@ -521,7 +546,8 @@ class JsonSchemaGenerator @JvmOverloads constructor(
           get() = node
 
         override fun format(format: JsonValueFormat?) {
-          setFormat(node, format.toString())
+          if (type?.isTypeOrSubTypeOf(Date::class.java) != true)
+            setFormat(node, format.toString())
         }
 
         override fun numberType(type: JsonParser.NumberType?) {

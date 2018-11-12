@@ -10,6 +10,7 @@ import org.yaml.snakeyaml.Yaml
 import java.io.File
 import java.io.FileWriter
 import java.io.StringWriter
+import java.io.Writer
 
 open class ServerlessBuilderTask : DefaultTask() {
 
@@ -22,7 +23,22 @@ open class ServerlessBuilderTask : DefaultTask() {
   @Option(option = "extraModelClassNames", description = "Extra models to include")
   open var extraModelClassNames: Array<String> = arrayOf()
 
-  @Option(option = "archive", description = "Base package to scan")
+  @Option(option = "excludeRegex", description = "Extra models to include")
+  open var excludeRegex: Array<String> = arrayOf()
+
+  @Option(option = "excludePropertyRegex", description = "Extra models to include")
+  open var excludePropertyRegex: Array<String> = arrayOf()
+
+  @Option(option = "excludeModelRegex", description = "Extra models to include")
+  open var excludeModelRegex: Array<String> = arrayOf()
+
+  @Option(option = "excludeFunctionRegex", description = "Extra models to include")
+  open var excludeFunctionRegex: Array<String> = arrayOf()
+
+  @Option(option = "defaultCorsConfig", description = "Extra models to include")
+  open var defaultCORSHeaders: List<String> = listOf()
+
+  @Option(option = "basePackage", description = "Base package to scan")
   open var basePackage: String? = null
 
   @Option(option = "archive", description = "The archive to scan, should be a shadowed jar")
@@ -56,7 +72,7 @@ open class ServerlessBuilderTask : DefaultTask() {
    */
   private fun getServerlessTemplateContent():String {
     val writer = StringWriter()
-    getServerlessTemplate().process(getTemplateDataModel(),writer)
+    getServerlessTemplate().process(getTemplateDataModel(),writer as Writer)
     return writer.buffer.toString()
   }
 
@@ -92,6 +108,11 @@ open class ServerlessBuilderTask : DefaultTask() {
     // CONFIGURE
     functionBuilder.generateDocumentation = generateDocumentation
     functionBuilder.extraModelClassNames = extraModelClassNames
+    functionBuilder.excludeRegex = excludeRegex
+    functionBuilder.excludeModelRegex = excludeModelRegex
+    functionBuilder.excludeFunctionRegex = excludeFunctionRegex
+    functionBuilder.excludePropertyRegex = excludePropertyRegex
+
     // GET THE BASE CONFIG
     val baseConfig = when {
       serverlessConfigFile == null -> getServerlessConfig()
@@ -102,7 +123,7 @@ open class ServerlessBuilderTask : DefaultTask() {
     val config = baseConfig.toMutableMap()
 
     // SCAN PACKAGES FOR FUNCTIONS
-    val functionConfigs = functionBuilder.getFunctionConfigs(archive, basePackage)
+    val functionConfigs = functionBuilder.getFunctionConfigs(archive, basePackage, defaultCORSHeaders)
 
     // UPDATE FUNCTIONS CONFIG
     val functions:MutableMap<Any,Any> = when {

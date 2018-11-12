@@ -5,12 +5,13 @@ import org.gradle.api.tasks.bundling.Jar
 import java.util.Date
 import java.util.Properties
 import java.io.StringReader
-
+import Versions
+import org.gradle.api.internal.tasks.testing.junitplatform.JUnitPlatformSpec
 
 buildscript {
   dependencies {
-    //classpath("com.github.jengelman.gradle.plugins:shadow:2.0.4")
     classpath("com.github.zafarkhaja:java-semver:0.9.0")
+    classpath("org.junit.platform:junit-platform-gradle-plugin:${Versions.junitPlatform}")
   }
 }
 
@@ -48,7 +49,7 @@ subprojects {
   apply(plugin = "kotlin")
   apply(plugin = "maven-publish")
   apply(plugin = "com.jfrog.bintray")
-
+  apply(plugin = "org.junit.platform.gradle.plugin")
 
   repositories {
     mavenCentral()
@@ -58,7 +59,16 @@ subprojects {
 
   dependencies {
     "implementation"(kotlin("stdlib-jdk8"))
-    "testImplementation"("junit", "junit", "4.12")
+
+    testRuntime(
+      "org.junit.jupiter:junit-jupiter-engine:${Versions.junit}"
+    )
+
+
+    "testImplementation"(
+      //"junit:junit:${Versions.junit}",
+      "org.junit.jupiter:junit-jupiter-api:${Versions.junit}"
+    )
   }
 
   /**
@@ -83,10 +93,6 @@ subprojects {
     classifier = "sources"
     from(sourceSets["main"].java.srcDirs)
   }
-//  val sourcesJar by tasks.registering(Jar::class) {
-//    classifier = "sources"
-//    from(sourceSets["main"].allSource)
-//  }
 
   /**
    * Artifacts (SOURCES)
@@ -130,7 +136,6 @@ subprojects {
       artifactId = this@subprojects.name
       version = VERSION
       artifact(sourcesJar)
-      //setArtifacts(mutableListOf(tasks.getByName("sourceJar"), tasks.getByName("jar")))
     }
   }
 
@@ -179,3 +184,6 @@ tasks {
     }
   }
 }
+
+
+
